@@ -1,10 +1,10 @@
 import sqlite3
+import cartopy.crs as ccrs
 from config import *
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-
+import cartopy
 
 class DB_Map():
     def __init__(self, database):
@@ -58,9 +58,41 @@ class DB_Map():
             coordinates = cursor.fetchone()
             return coordinates
 
-    def create_grapf(self, path, cities):
+    def create_grapf(self, path, cities, marker_color='red'):
         if not cities:
             return None
+
+        # Создаем карту
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.PlateCarree())
+
+        ax.coastlines()
+        ax.stock_img()
+        
+        for city in cities:
+            coords = self.get_coordinates(city)
+            if coords:
+                lat, lon = coords
+                # Точка с выбранным цветом
+                ax.plot(lon, lat, marker='o', color=marker_color, markersize=5, transform=ccrs.PlateCarree())
+                ax.text(lon + 1, lat + 1, city, transform=ccrs.PlateCarree(), fontsize=8)
+
+        plt.title('Ваши города на карте')
+        plt.savefig(path)
+        plt.close()
+        return path
+
+
+        
+    def draw_distance(self, path, city1, city2, marker_color='red', line_color='blue'):
+        coords1 = self.get_coordinates(city1)
+        coords2 = self.get_coordinates(city2)
+
+        if not coords1 or not coords2:
+            return None
+
+        lat1, lon1 = coords1
+        lat2, lon2 = coords2
 
         # Создаем карту
         fig = plt.figure(figsize=(10, 6))
@@ -68,23 +100,21 @@ class DB_Map():
         ax.coastlines()
         ax.stock_img()
 
-        for city in cities:
-            coords = self.get_coordinates(city)
-            if coords:
-                lat, lon = coords
-                # Рисуем точку на карте
-                ax.plot(lon, lat, marker='o', color='red', markersize=5, transform=ccrs.PlateCarree())
-                # Подписываем город
-                ax.text(lon + 1, lat + 1, city, transform=ccrs.PlateCarree(), fontsize=8)
+        # Точки городов
+        ax.plot([lon1, lon2], [lat1, lat2], marker='o', color=marker_color, markersize=5, transform=ccrs.PlateCarree())
 
-        plt.title('Ваши города на карте 🌍')
+        # Подписи
+        ax.text(lon1 + 1, lat1 + 1, city1, transform=ccrs.PlateCarree(), fontsize=8)
+        ax.text(lon2 + 1, lat2 + 1, city2, transform=ccrs.PlateCarree(), fontsize=8)
+
+        # Линия между городами
+        ax.plot([lon1, lon2], [lat1, lat2], color=line_color, linewidth=2, transform=ccrs.PlateCarree())
+
+        plt.title(f'Расстояние между {city1} и {city2} 🌍')
         plt.savefig(path)
         plt.close()
         return path
 
-        
-    def draw_distance(self, city1, city2):
-        pass
 
 
 if __name__=="__main__":
