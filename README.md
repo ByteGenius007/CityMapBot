@@ -15,7 +15,7 @@
 1. Склонируй репозиторий:
 
 ```bash
-git clone https://github.com/ByteGenius007/show_cities.git
+git clone https://github.com/ByteGenius007/CityMapBot.git
 cd CityMapBot
 ````
 
