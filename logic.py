@@ -59,7 +59,29 @@ class DB_Map():
             return coordinates
 
     def create_grapf(self, path, cities):
-        pass
+        if not cities:
+            return None
+
+        # Создаем карту
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.PlateCarree())
+        ax.coastlines()
+        ax.stock_img()
+
+        for city in cities:
+            coords = self.get_coordinates(city)
+            if coords:
+                lat, lon = coords
+                # Рисуем точку на карте
+                ax.plot(lon, lat, marker='o', color='red', markersize=5, transform=ccrs.PlateCarree())
+                # Подписываем город
+                ax.text(lon + 1, lat + 1, city, transform=ccrs.PlateCarree(), fontsize=8)
+
+        plt.title('Ваши города на карте 🌍')
+        plt.savefig(path)
+        plt.close()
+        return path
+
         
     def draw_distance(self, city1, city2):
         pass
@@ -69,3 +91,4 @@ if __name__=="__main__":
     
     m = DB_Map(DATABASE)
     m.create_user_table()
+
